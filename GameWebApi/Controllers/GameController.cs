@@ -186,6 +186,7 @@ namespace GameWebApi.Controllers
                     {
                         if (l.Count > 0) PlayToday = l[0].count;
                     }
+                    int need_count = Convert.ToInt32(Convert.ToDouble(result.h_money_pay) / 1.5);
                     resultData.data = new
                     {
                         uid = result.id,
@@ -199,7 +200,9 @@ namespace GameWebApi.Controllers
                         is_news_user = result.is_news_user,
                         head_pic = result.head_pic,
                         real_name = result.real_name,
-                        play_count = PlayToday
+                        play_count = PlayToday,
+                        need_count = need_count
+
                     };
                 }
                 else
