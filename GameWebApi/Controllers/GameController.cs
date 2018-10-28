@@ -177,6 +177,15 @@ namespace GameWebApi.Controllers
                     //{
                     //    name = result.real_name;
                     //}
+                    SqlDataBase db = new SqlDataBase();
+                    string today = DateTime.Now.ToString("yyyy-MM-dd");
+                    List<SettleAccounts> l = db.Select<SettleAccounts>("select count from game_user_daily_count where uid=@uid and date=@today and active=1",
+                                    new { uid = result.id, today = today });
+                    int PlayToday = 0;//今天游戏局数
+                    if (l != null)
+                    {
+                        if (l.Count > 0) PlayToday = l[0].count;
+                    }
                     resultData.data = new
                     {
                         uid = result.id,
@@ -189,7 +198,8 @@ namespace GameWebApi.Controllers
                         isLockedTradeGameType = result.is_locked_trade_game_type,
                         is_news_user = result.is_news_user,
                         head_pic = result.head_pic,
-                        real_name = result.real_name
+                        real_name = result.real_name,
+                        play_count = PlayToday
                     };
                 }
                 else
