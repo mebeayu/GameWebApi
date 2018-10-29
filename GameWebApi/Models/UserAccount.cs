@@ -112,5 +112,7 @@ namespace GameWebApi.Models
         /// </summary>
         public string is_news_user { get; set; }
 
+
+
     }
 }
