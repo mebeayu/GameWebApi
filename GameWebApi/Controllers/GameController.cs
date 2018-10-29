@@ -1044,44 +1044,49 @@ namespace GameWebApi.Controllers
             }
             else
             {
-                //在这里更新用户每日玩游戏次数，表：game_user_daily_count
-                string today = DateTime.Now.ToString("yyyy-MM-dd");
-                int res = db.Execute("update game_user_daily_count set count=count+1 where date=@today and uid=@uid", new { uid = obj.uid, today = today });
-                if (res == 0)
+                if(obj.valType==-1) //在这里更新用户每日玩游戏次数，表：game_user_daily_count
                 {
-                    res = db.Execute("insert into game_user_daily_count(uid,date,count) values(@uid,@date,1)", new { uid = obj.uid, date = today });
-                    if (res <= 0)
+                    string today = DateTime.Now.ToString("yyyy-MM-dd");
+                    int res = db.Execute("update game_user_daily_count set count=count+1 where date=@today and uid=@uid", new { uid = obj.uid, today = today });
+                    if (res == 0)
                     {
-                        data_res = new ResultData();
-                        data_res.status = "0";
-                        data_res.message = "更新游戏局数失败";
-                        return data_res;
+                        res = db.Execute("insert into game_user_daily_count(uid,date,count) values(@uid,@date,1)", new { uid = obj.uid, date = today });
+                        if (res <= 0)
+                        {
+                            data_res = new ResultData();
+                            data_res.status = "0";
+                            data_res.message = "更新游戏局数失败";
+                            return data_res;
+                        }
+                        else
+                        {
+                            data_res = new ResultData();
+                            data_res.status = "0";
+                            data_res.message = "成功";
+                            return data_res;
+                        }
                     }
-                    else
+                    else if (res > 0)
                     {
                         data_res = new ResultData();
                         data_res.status = "0";
                         data_res.message = "成功";
                         return data_res;
                     }
+                    else
+                    {
+                        data_res = new ResultData();
+                        data_res.status = "0";
+                        data_res.message = "更新游戏局数失败";
+                        return data_res;
+                    }
                 }
-                else if (res > 0)
-                {
-                    data_res = new ResultData();
-                    data_res.status = "0";
-                    data_res.message = "成功";
-                    return data_res;
-                }
-                else
-                {
-                    data_res = new ResultData();
-                    data_res.status = "0";
-                    data_res.message = "更新游戏局数失败";
-                    return data_res;
-                }
+                data_res = new ResultData();
+                data_res.status = "0";
+                data_res.message = "成功";
+                return data_res;
 
             }
-
 
         }
         /// <summary>
