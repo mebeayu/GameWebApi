@@ -1147,7 +1147,7 @@ namespace GameWebApi.Controllers
         {
             SqlDataBase db = new SqlDataBase();
 
-            List<SettleAccounts> l = db.Select<SettleAccounts>("select h_money_pay as redPacket from rrl_user where id=@uid",
+            List<SettleAccounts> l = db.Select<SettleAccounts>("select need_play_conut  from rrl_user where id=@uid",
                 new { uid = obj.uid });
 
             ResultData data_res = new ResultData();
@@ -1167,18 +1167,17 @@ namespace GameWebApi.Controllers
                 data_res.data = -1;
                 return data_res;
             }
-            if (l[0].redPacket == 0)
-            {
-                data_res.status = "2";
-                data_res.message = "用户V红包数量为0";
-                data_res.data = -1;
-                return data_res;
-            }
+            //if (l[0].redPacket == 0)
+            //{
+            //    data_res.status = "2";
+            //    data_res.message = "用户V红包数量为0";
+            //    data_res.data = -1;
+            //    return data_res;
+            //}
             else
             {
-                double h_money_pay = Convert.ToDouble(l[0].redPacket);
-                int NeedPlayCount = Convert.ToInt32((h_money_pay / 1.5));//所需局数转换条件为V红包金额/1.5
-                data_res.data = NeedPlayCount;
+                int need_play_conut = Convert.ToInt32(l[0].need_play_conut);
+                data_res.data = need_play_conut;
             }
             return data_res;
         }
@@ -1219,7 +1218,7 @@ namespace GameWebApi.Controllers
             if (l.Count > 0) PlayToday = l[0].count;
             int NeedPlayCount = 99999;//需要的局数
             double h_money_pay = 0;
-            l = db.Select<SettleAccounts>("select h_money_pay as redPacket from rrl_user where id=@uid",
+            l = db.Select<SettleAccounts>("select h_money_pay as redPacket,need_play_conut from rrl_user where id=@uid",
                 new { uid = obj.uid });
 
             if (l == null)
@@ -1243,7 +1242,7 @@ namespace GameWebApi.Controllers
             else
             {
                 h_money_pay = Convert.ToDouble(l[0].redPacket);
-                NeedPlayCount = Convert.ToInt32((h_money_pay / 1.5));//所需局数转换条件为V红包金额/1.5
+                NeedPlayCount = l[0].need_play_conut;//所需局数转换条件为V红包金额/1.5
             }
             if(PlayToday< NeedPlayCount)
             {
@@ -1251,7 +1250,7 @@ namespace GameWebApi.Controllers
                 data_res.message = $@"用户今天游戏局数{PlayToday}小于兑换需要的局数{NeedPlayCount}";
                 return data_res;
             }
-            int res = db.Execute("update rrl_user set h_money_pay=0,h_money=h_money+@h_money_pay where id=@uid",
+            int res = db.Execute("update rrl_user set h_money_pay=0,h_money=h_money+@h_money_pay,need_play_conut=20 where id=@uid",
                 new { uid = obj.uid, h_money_pay = h_money_pay });
             if(res<=0)
             {
@@ -1281,7 +1280,7 @@ namespace GameWebApi.Controllers
             SqlDataBase db = new SqlDataBase();
             string today = DateTime.Now.ToString("yyyy-MM-dd");
             
-            List<SettleAccounts> users = db.Select<SettleAccounts>("select id as uid,h_money_pay as redPacket from rrl_user where h_money_pay>0",null);
+            List<SettleAccounts> users = db.Select<SettleAccounts>("select id as uid,h_money_pay as redPacket,need_play_conut from rrl_user where h_money_pay>0", null);
             List<ClearUser> list = new List<ClearUser>();
             int length = users.Count;
             int count = 0;
@@ -1296,7 +1295,7 @@ namespace GameWebApi.Controllers
                 u.to_clear = 0;
 
                 double h_money_pay = Convert.ToDouble(user.redPacket);
-                int NeedPlayCount = Convert.ToInt32((h_money_pay / 1.5));//所需局数转换条件为V红包金额/1.5
+                int NeedPlayCount = user.need_play_conut;//所需局数转换条件为V红包金额/1.5
                 List<SettleAccounts> l = db.Select<SettleAccounts>("select count from game_user_daily_count where uid=@uid and date=@today and active=1",
                 new { uid = user.uid, today = today });
                 int PlayToday = 0;//今天游戏局数
@@ -1306,14 +1305,14 @@ namespace GameWebApi.Controllers
                 u.NeedPlayCount = NeedPlayCount;
                 if (PlayToday>= NeedPlayCount)
                 {
-                    res = db.Execute("update rrl_user set h_money_pay=0,h_money=h_money+@h_money_pay where id=@uid",
+                    res = db.Execute("update rrl_user set h_money_pay=0,h_money=h_money+@h_money_pay,need_play_conut=20 where id=@uid",
                     new { uid = user.uid, h_money_pay = h_money_pay });
                     u.to_bean = h_money_pay;
                     u.to_clear = h_money_pay;
                 }
                 else
                 {
-                    res = db.Execute("update rrl_user set h_money_pay=0  where id=@uid",
+                    res = db.Execute("update rrl_user set h_money_pay=0,need_play_conut=20  where id=@uid",
                     new { uid = user.uid});
                     u.to_bean = 0;
                     u.to_clear = h_money_pay;

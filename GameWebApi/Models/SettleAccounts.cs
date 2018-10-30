@@ -13,5 +13,6 @@ namespace GameWebApi.Models
         public decimal redPacket { get; set; }//h_money_pay
         public int count { get; set; }
         public int valType { get; set; }
+        public int need_play_conut { get; set; }
     }
 }
