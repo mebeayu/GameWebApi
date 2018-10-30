@@ -186,7 +186,7 @@ namespace GameWebApi.Controllers
                     {
                         if (l.Count > 0) PlayToday = l[0].count;
                     }
-                    int need_count = Convert.ToInt32(Convert.ToDouble(result.h_money_pay) / 1.5);
+                    //int need_count = Convert.ToInt32(Convert.ToDouble(result.h_money_pay) / 1.5);
                     resultData.data = new
                     {
                         uid = result.id,
@@ -201,7 +201,7 @@ namespace GameWebApi.Controllers
                         head_pic = result.head_pic,
                         real_name = result.real_name,
                         play_count = PlayToday,
-                        need_count = need_count
+                        need_count = result.need_play_conut
 
                     };
                 }
@@ -1060,15 +1060,15 @@ namespace GameWebApi.Controllers
                 if(obj.valType==-1) //在这里更新用户每日玩游戏次数，表：game_user_daily_count
                 {
                     string today = DateTime.Now.ToString("yyyy-MM-dd");
-                    int res = db.Execute("update game_user_daily_count set count=count+1 where date=@today and uid=@uid", new { uid = obj.uid, today = today });
+                    int res = db.Execute("update game_user_daily_count set count=@count where date=@today and uid=@uid", new { uid = obj.uid, today = today,count=obj.count });
                     if (res == 0)
                     {
-                        res = db.Execute("insert into game_user_daily_count(uid,date,count) values(@uid,@date,1)", new { uid = obj.uid, date = today });
+                        res = db.Execute("insert into game_user_daily_count(uid,date,count) values(@uid,@date,@count)", new { uid = obj.uid, date = today, count = obj.count });
                         if (res <= 0)
                         {
                             data_res = new ResultData();
-                            data_res.status = "0";
-                            data_res.message = "更新游戏局数失败";
+                            data_res.status = "1";
+                            data_res.message = "结算成功，更新游戏局数失败";
                             return data_res;
                         }
                         else
@@ -1089,8 +1089,8 @@ namespace GameWebApi.Controllers
                     else
                     {
                         data_res = new ResultData();
-                        data_res.status = "0";
-                        data_res.message = "更新游戏局数失败";
+                        data_res.status = "1";
+                        data_res.message = "结算成功，更新游戏局数失败";
                         return data_res;
                     }
                 }

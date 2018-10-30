@@ -111,6 +111,7 @@ namespace GameWebApi.Models
         /// 是否是新用户 1=新用户,0=老用户
         /// </summary>
         public string is_news_user { get; set; }
+        public int need_play_conut { get; set; }
 
 
 
