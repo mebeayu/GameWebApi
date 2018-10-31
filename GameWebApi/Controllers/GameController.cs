@@ -1060,7 +1060,7 @@ namespace GameWebApi.Controllers
                 if(obj.valType==-1) //在这里更新用户每日玩游戏次数，表：game_user_daily_count
                 {
                     string today = DateTime.Now.ToString("yyyy-MM-dd");
-                    int res = db.Execute("update game_user_daily_count set count=@count where date=@today and uid=@uid", new { uid = obj.uid, today = today,count=obj.count });
+                    int res = db.Execute("update game_user_daily_count set count=@count,active=1 where date=@today and uid=@uid", new { uid = obj.uid, today = today,count=obj.count });
                     if (res == 0)
                     {
                         res = db.Execute("insert into game_user_daily_count(uid,date,count) values(@uid,@date,@count)", new { uid = obj.uid, date = today, count = obj.count });
