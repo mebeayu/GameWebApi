@@ -1242,7 +1242,7 @@ namespace GameWebApi.Controllers
             else
             {
                 h_money_pay = Convert.ToDouble(l[0].redPacket);
-                NeedPlayCount = l[0].need_play_conut;//所需局数转换条件为V红包金额/1.5
+                NeedPlayCount = l[0].need_play_conut;//所需局数转
             }
             if(PlayToday< NeedPlayCount)
             {
