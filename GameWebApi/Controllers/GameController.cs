@@ -1281,18 +1281,18 @@ namespace GameWebApi.Controllers
             string today = DateTime.Now.ToString("yyyy-MM-dd");
             
             List<SettleAccounts> users = db.Select<SettleAccounts>("select id as uid,h_money_pay as redPacket,need_play_conut from rrl_user where h_money_pay>0", null);
-            List<ClearUser> list = new List<ClearUser>();
+            //List<ClearUser> list = new List<ClearUser>();
             int length = users.Count;
-            int count = 0;
+            //int count = 0;
             for (int i = 0; i < length; i++)
             {
                 SettleAccounts user = users[i];
 
-                ClearUser u = new ClearUser();
+                //ClearUser u = new ClearUser();
 
-                u.uid = user.uid;
-                u.to_bean = 0;
-                u.to_clear = 0;
+                //u.uid = user.uid;
+                //u.to_bean = 0;
+                //u.to_clear = 0;
 
                 double h_money_pay = Convert.ToDouble(user.redPacket);
                 int NeedPlayCount = user.need_play_conut;//所需局数转换条件为V红包金额/1.5
@@ -1301,30 +1301,30 @@ namespace GameWebApi.Controllers
                 int PlayToday = 0;//今天游戏局数
                 if (l.Count > 0) PlayToday = l[0].count;
                 int res = 0;
-                u.PlayToday = PlayToday;
-                u.NeedPlayCount = NeedPlayCount;
+                //u.PlayToday = PlayToday;
+                //u.NeedPlayCount = NeedPlayCount;
                 if (PlayToday>= NeedPlayCount)
                 {
                     res = db.Execute("update rrl_user set h_money_pay=0,h_money=h_money+@h_money_pay,need_play_conut=20 where id=@uid",
                     new { uid = user.uid, h_money_pay = h_money_pay });
-                    u.to_bean = h_money_pay;
-                    u.to_clear = h_money_pay;
+                    //u.to_bean = h_money_pay;
+                    //u.to_clear = h_money_pay;
                 }
                 else
                 {
                     res = db.Execute("update rrl_user set h_money_pay=0,need_play_conut=20  where id=@uid",
                     new { uid = user.uid});
-                    u.to_bean = 0;
-                    u.to_clear = h_money_pay;
+                    //u.to_bean = 0;
+                    //u.to_clear = h_money_pay;
                 }
                 if (res > 0)
                 {
                     db.Execute("update game_user_daily_count set active=0 where date=@today", new { today = today });
-                    list.Add(u);
+                    //list.Add(u);
                 }
                
             }
-            data_res.data = list;
+            data_res.data = length;
             return data_res;
 
         }
