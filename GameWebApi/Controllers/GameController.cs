@@ -1067,12 +1067,20 @@ namespace GameWebApi.Controllers
             {
                 if(obj.game_record!=null)
                 {
+                    obj.game_record.uid = obj.uid;
                     string detail = JsonConvert.SerializeObject(obj.game_record.detail);
                     int res = db.Execute(@"insert into game_record(detail,total_bean,total_v_money,total_free,result,result_odds,win,income,uid,start_time,end_time,game_type,game_id) 
 values(@detail,@total_bean,@total_v_money,@total_free,@result,@result_odds,@win,@income,@uid,@start_time,@end_time,@game_type,@game_id)",
 new { detail=detail, total_bean =obj.game_record.total_bean, total_v_money =obj.game_record.total_v_money, total_free =obj.game_record.total_free,
 result=obj.game_record.result,result_odds=obj.game_record.result_odds,win=obj.game_record.win,income=obj.game_record.income,uid=obj.game_record.uid,
 start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_type=obj.game_record.game_type,game_id=obj.game_record.game_id});
+                    if (res <= 0)
+                    {
+                        data_res = new ResultData();
+                        data_res.status = "1";
+                        data_res.message = "结算成功，记录游戏明细失败";
+                        return data_res;
+                    }
                 }
                 if(obj.valType==-1) //在这里更新用户每日玩游戏次数，表：game_user_daily_count
                 {
