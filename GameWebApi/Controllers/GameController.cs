@@ -1050,6 +1050,23 @@ namespace GameWebApi.Controllers
         public ResultData settle_accounts([FromBody] SettleAccounts obj)
         {
             SqlDataBase db = new SqlDataBase();
+            decimal last_bean = 0;
+            decimal last_v_money = 0;
+            decimal last_free = 0;
+            decimal cur_bean = 0;
+            decimal cur_v_money = 0;
+            decimal cur_free = 0;
+            List<UserAccount> list_acc = db.Select<UserAccount>("select h_money_free,h_money_pay,h_money from rrl_user where id=@uid", new { uid = obj.uid });
+            if (list_acc != null && list_acc.Count > 0)
+            {
+                last_bean = list_acc[0].h_money;
+                last_v_money = list_acc[0].h_money_pay;
+                last_free = list_acc[0].h_money_free;
+
+            }
+            cur_bean = last_bean + obj.goldenBeans;
+            cur_v_money = last_v_money + obj.redPacket;
+            cur_free = last_free + obj.freeRedPacket;
             string sql = @"UPDATE rrl_user SET 
                             h_money = h_money + @goldenBeans ,h_money_free = h_money_free + @freeRedPacket,h_money_pay = h_money_pay + @redPacket 
                             WHERE id =@id and h_money+@goldenBeans>=0 and h_money_free+@freeRedPacket >=0 and isnull(h_money_pay,0) + @redPacket >= 0 and 
@@ -1067,25 +1084,14 @@ namespace GameWebApi.Controllers
             {
                 if(obj.game_record!=null)
                 {
-                    decimal last_bean = 0;
-                    decimal last_v_money = 0;
-                    decimal last_free = 0;
-
-                    List<UserAccount> list_acc = db.Select<UserAccount>("select h_money_free,h_money_pay,h_money from rrl_user where id=@uid",new { uid=obj.uid});
-                    if(list_acc!=null&&list_acc.Count>0)
-                    {
-                        last_bean = list_acc[0].last_bean;
-                        last_v_money = list_acc[0].last_v_money;
-                        last_free = list_acc[0].last_free;
-
-                    }
+                    
                     obj.game_record.uid = obj.uid;
                     string detail = JsonConvert.SerializeObject(obj.game_record.detail);
-                    int res = db.Execute(@"insert into game_record(detail,total_bean,total_v_money,total_free,result,result_odds,win,income,uid,start_time,end_time,game_type,game_id,last_bean,last_v_money,last_free) 
-values(@detail,@total_bean,@total_v_money,@total_free,@result,@result_odds,@win,@income,@uid,@start_time,@end_time,@game_type,@game_id,@last_bean,,@last_v_money,,@last_free)",
+                    int res = db.Execute(@"insert into game_record(detail,total_bean,total_v_money,total_free,result,result_odds,win,income,uid,start_time,end_time,game_type,game_id,last_bean,last_v_money,last_free,cur_bean,cur_v_money,cur_free,bean,v_money,free) 
+values(@detail,@total_bean,@total_v_money,@total_free,@result,@result_odds,@win,@income,@uid,@start_time,@end_time,@game_type,@game_id,@last_bean,@last_v_money,@last_free,@cur_bean,@cur_v_money,@cur_free,@bean,@v_money,@free)",
 new { detail=detail, total_bean =obj.game_record.total_bean, total_v_money =obj.game_record.total_v_money, total_free =obj.game_record.total_free,
 result=obj.game_record.result,result_odds=obj.game_record.result_odds,win=obj.game_record.win,income=obj.game_record.income,uid=obj.game_record.uid,
-start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_type=obj.game_record.game_type,game_id=obj.game_record.game_id,last_bean=last_bean,last_v_money=last_v_money,last_free=last_free});
+start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_type=obj.game_record.game_type,game_id=obj.game_record.game_id,last_bean=last_bean,last_v_money=last_v_money,last_free=last_free,cur_bean=cur_bean,cur_v_money=cur_v_money,cur_free=cur_free,bean=obj.goldenBeans,v_money=obj.redPacket,free=obj.freeRedPacket});
                     if (res <= 0)
                     {
                         data_res = new ResultData();

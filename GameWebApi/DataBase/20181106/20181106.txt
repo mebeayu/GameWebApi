@@ -1,0 +1,2 @@
+2018-11-06 15:06:04.440Execute-->Incorrect syntax near ','.
+2018-11-06 15:07:48.553Execute-->Incorrect syntax near ','.
