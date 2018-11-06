@@ -14,5 +14,6 @@ namespace GameWebApi.Models
         public int count { get; set; }
         public int valType { get; set; }
         public int need_play_conut { get; set; }
+        public GameRecord game_record { get; set; }
     }
 }
