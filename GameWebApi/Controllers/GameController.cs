@@ -1067,13 +1067,25 @@ namespace GameWebApi.Controllers
             {
                 if(obj.game_record!=null)
                 {
+                    decimal last_bean = 0;
+                    decimal last_v_money = 0;
+                    decimal last_free = 0;
+
+                    List<UserAccount> list_acc = db.Select<UserAccount>("select h_money_free,h_money_pay,h_money from rrl_user where id=@uid",new { uid=obj.uid});
+                    if(list_acc!=null&&list_acc.Count>0)
+                    {
+                        last_bean = list_acc[0].last_bean;
+                        last_v_money = list_acc[0].last_v_money;
+                        last_free = list_acc[0].last_free;
+
+                    }
                     obj.game_record.uid = obj.uid;
                     string detail = JsonConvert.SerializeObject(obj.game_record.detail);
-                    int res = db.Execute(@"insert into game_record(detail,total_bean,total_v_money,total_free,result,result_odds,win,income,uid,start_time,end_time,game_type,game_id) 
-values(@detail,@total_bean,@total_v_money,@total_free,@result,@result_odds,@win,@income,@uid,@start_time,@end_time,@game_type,@game_id)",
+                    int res = db.Execute(@"insert into game_record(detail,total_bean,total_v_money,total_free,result,result_odds,win,income,uid,start_time,end_time,game_type,game_id,last_bean,last_v_money,last_free) 
+values(@detail,@total_bean,@total_v_money,@total_free,@result,@result_odds,@win,@income,@uid,@start_time,@end_time,@game_type,@game_id,@last_bean,,@last_v_money,,@last_free)",
 new { detail=detail, total_bean =obj.game_record.total_bean, total_v_money =obj.game_record.total_v_money, total_free =obj.game_record.total_free,
 result=obj.game_record.result,result_odds=obj.game_record.result_odds,win=obj.game_record.win,income=obj.game_record.income,uid=obj.game_record.uid,
-start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_type=obj.game_record.game_type,game_id=obj.game_record.game_id});
+start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_type=obj.game_record.game_type,game_id=obj.game_record.game_id,last_bean=last_bean,last_v_money=last_v_money,last_free=last_free});
                     if (res <= 0)
                     {
                         data_res = new ResultData();

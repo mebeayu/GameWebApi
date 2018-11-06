@@ -113,6 +113,10 @@ namespace GameWebApi.Models
         public string is_news_user { get; set; }
         public int need_play_conut { get; set; }
 
+        public decimal last_bean { get; set; }
+        public decimal last_v_money { get; set; }
+        public decimal last_free { get; set; }
+
 
 
     }
