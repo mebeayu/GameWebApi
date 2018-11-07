@@ -1304,10 +1304,13 @@ start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_typ
             else
             {
                 db.Execute("update game_user_daily_count set count=0 where uid=@uid and date=@today", new { uid = obj.uid, today = today });
+                db.Execute("insert into rrl_user_money_record(addtime,money,type,remark,uid) values(@addtime,@money,200,@remark,@uid)",
+                    new { addtime=DateTime.Now,money= h_money_pay, remark=string.Format("V红包转金豆：{0}", h_money_pay),uid= obj.uid });
                 data_res.status = "0";
                 data_res.data = h_money_pay;
                 data_res.message = "成功";
                 return data_res;
+                
             }
             
         }
