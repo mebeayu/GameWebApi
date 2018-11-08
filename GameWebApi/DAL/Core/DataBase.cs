@@ -50,7 +50,11 @@ namespace GameWebApi.DAL
             finally
             {
                 if (conn != null)
+                {
                     conn.Close();
+                    conn.Dispose();
+                }
+                    
             }
 
         }
@@ -74,7 +78,11 @@ namespace GameWebApi.DAL
             finally
             {
                 if (conn != null)
+                {
                     conn.Close();
+                    conn.Dispose();
+
+                }
             }
 
         }
@@ -99,7 +107,10 @@ namespace GameWebApi.DAL
             finally
             {
                 if (conn != null)
+                {
                     conn.Close();
+                    conn.Dispose();
+                }
             }
 
         }
@@ -123,7 +134,10 @@ namespace GameWebApi.DAL
             finally
             {
                 if (conn != null)
+                {
                     conn.Close();
+                    conn.Dispose();
+                }
             }
 
         }
@@ -146,7 +160,10 @@ namespace GameWebApi.DAL
             finally
             {
                 if (conn != null)
+                {
                     conn.Close();
+                    conn.Dispose();
+                }
             }
 
         }
@@ -171,7 +188,10 @@ namespace GameWebApi.DAL
             finally
             {
                 if (conn != null)
+                {
                     conn.Close();
+                    conn.Dispose();
+                }
             }
 
         }
@@ -195,7 +215,10 @@ namespace GameWebApi.DAL
             finally
             {
                 if (conn != null)
+                {
                     conn.Close();
+                    conn.Dispose();
+                }
             }
 
         }
@@ -240,7 +263,10 @@ namespace GameWebApi.DAL
             finally
             {
                 if (conn != null)
+                {
                     conn.Close();
+                    conn.Dispose();
+                }
             }
 
         }
@@ -266,7 +292,10 @@ namespace GameWebApi.DAL
             finally
             {
                 if (conn != null)
+                {
                     conn.Close();
+                    conn.Dispose();
+                }
             }
 
         }
