@@ -9,6 +9,8 @@ using System.Text;
 using System.Linq;
 using System.Data;
 using Newtonsoft.Json;
+using RRL.DB;
+using System.Data.SqlClient;
 
 namespace GameWebApi.Controllers
 {
@@ -1049,6 +1051,7 @@ namespace GameWebApi.Controllers
         [ActionName("settle_accounts")]
         public ResultData settle_accounts([FromBody] SettleAccounts obj)
         {
+
             SqlDataBase db = new SqlDataBase();
             decimal last_bean = 0;
             decimal last_v_money = 0;
@@ -1082,16 +1085,40 @@ namespace GameWebApi.Controllers
             }
             else
             {
-                if(obj.game_record!=null)
+                if (obj.game_record != null)
                 {
-                    
+
                     obj.game_record.uid = obj.uid;
                     string detail = JsonConvert.SerializeObject(obj.game_record.detail);
                     int res = db.Execute(@"insert into game_record(detail,total_bean,total_v_money,total_free,result,result_odds,win,income,uid,start_time,end_time,game_type,game_id,last_bean,last_v_money,last_free,cur_bean,cur_v_money,cur_free,bean,v_money,free,valType,play_count) 
 values(@detail,@total_bean,@total_v_money,@total_free,@result,@result_odds,@win,@income,@uid,@start_time,@end_time,@game_type,@game_id,@last_bean,@last_v_money,@last_free,@cur_bean,@cur_v_money,@cur_free,@bean,@v_money,@free,@valType,@play_count)",
-new { detail=detail, total_bean =obj.game_record.total_bean, total_v_money =obj.game_record.total_v_money, total_free =obj.game_record.total_free,
-result=obj.game_record.result,result_odds=obj.game_record.result_odds,win=obj.game_record.win,income=obj.game_record.income,uid=obj.game_record.uid,
-start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_type=obj.game_record.game_type,game_id=obj.game_record.game_id,last_bean=last_bean,last_v_money=last_v_money,last_free=last_free,cur_bean=cur_bean,cur_v_money=cur_v_money,cur_free=cur_free,bean=obj.goldenBeans,v_money=obj.redPacket,free=obj.freeRedPacket,valType=obj.valType,play_count=obj.count});
+new
+{
+    detail = detail,
+    total_bean = obj.game_record.total_bean,
+    total_v_money = obj.game_record.total_v_money,
+    total_free = obj.game_record.total_free,
+    result = obj.game_record.result,
+    result_odds = obj.game_record.result_odds,
+    win = obj.game_record.win,
+    income = obj.game_record.income,
+    uid = obj.game_record.uid,
+    start_time = obj.game_record.start_time,
+    end_time = obj.game_record.end_time,
+    game_type = obj.game_record.game_type,
+    game_id = obj.game_record.game_id,
+    last_bean = last_bean,
+    last_v_money = last_v_money,
+    last_free = last_free,
+    cur_bean = cur_bean,
+    cur_v_money = cur_v_money,
+    cur_free = cur_free,
+    bean = obj.goldenBeans,
+    v_money = obj.redPacket,
+    free = obj.freeRedPacket,
+    valType = obj.valType,
+    play_count = obj.count
+});
                     if (res <= 0)
                     {
                         data_res = new ResultData();
@@ -1100,10 +1127,10 @@ start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_typ
                         return data_res;
                     }
                 }
-                if(obj.valType==-1) //在这里更新用户每日玩游戏次数，表：game_user_daily_count
+                if (obj.valType == -1) //在这里更新用户每日玩游戏次数，表：game_user_daily_count
                 {
                     string today = DateTime.Now.ToString("yyyy-MM-dd");
-                    int res = db.Execute("update game_user_daily_count set count=@count,active=1 where date=@today and uid=@uid", new { uid = obj.uid, today = today,count=obj.count });
+                    int res = db.Execute("update game_user_daily_count set count=@count,active=1 where date=@today and uid=@uid", new { uid = obj.uid, today = today, count = obj.count });
                     if (res == 0)
                     {
                         res = db.Execute("insert into game_user_daily_count(uid,date,count) values(@uid,@date,@count)", new { uid = obj.uid, date = today, count = obj.count });
@@ -1143,6 +1170,139 @@ start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_typ
                 return data_res;
 
             }
+
+        }
+        [HttpPost]
+        [ActionName("settle_accounts1")]
+        public ResultData settle_accounts1([FromBody] SettleAccounts obj)
+        {
+            RRLDB db = new RRLDB();
+            DataSet ds = null;
+            decimal last_bean = 0;
+            decimal last_v_money = 0;
+            decimal last_free = 0;
+            decimal cur_bean = 0;
+            decimal cur_v_money = 0;
+            decimal cur_free = 0;
+            ds = db.ExeQuery($@"select h_money_free,h_money_pay,h_money from rrl_user where id={obj.uid}");
+            if (ds != null && ds.Tables[0].Rows.Count > 0)
+            {
+                last_bean = decimal.Parse(ds.Tables[0].Rows[0]["h_money"].ToString());
+                last_v_money = decimal.Parse(ds.Tables[0].Rows[0]["h_money_pay"].ToString());
+                last_free = decimal.Parse(ds.Tables[0].Rows[0]["h_money_free"].ToString());
+            }
+            cur_bean = last_bean + obj.goldenBeans;
+            cur_v_money = last_v_money + obj.redPacket;
+            cur_free = last_free + obj.freeRedPacket;
+            string sql = @"UPDATE rrl_user SET 
+                                        h_money = h_money + @goldenBeans ,h_money_free = h_money_free + @freeRedPacket,h_money_pay = h_money_pay + @redPacket 
+                                        WHERE id =@id and h_money+@goldenBeans>=0 and h_money_free+@freeRedPacket >=0 and isnull(h_money_pay,0) + @redPacket >= 0 and 
+                                        isnull(is_locked_login,'0')='0'";
+            int rs = db.ExeCMD(sql, new SqlParameter("id", obj.uid),
+                new SqlParameter("goldenBeans", obj.goldenBeans),
+                new SqlParameter("freeRedPacket", obj.freeRedPacket),
+                new SqlParameter("redPacket", obj.redPacket));
+            ResultData data_res = new ResultData();
+            if (rs <= 0)
+            {
+                db.Close();
+                data_res.status = "1";
+                data_res.message = "更新账户失败";
+                return data_res;
+            }
+            if (obj.game_record != null)
+            {
+                obj.game_record.uid = obj.uid;
+                string detail = JsonConvert.SerializeObject(obj.game_record.detail);
+                int res = db.ExeCMD(@"insert into game_record(detail,total_bean,total_v_money,total_free,result,result_odds,win,income,uid,start_time,end_time,game_type,game_id,last_bean,last_v_money,last_free,cur_bean,cur_v_money,cur_free,bean,v_money,free,valType,play_count) 
+                values
+(@detail,@total_bean,@total_v_money,@total_free,@result,@result_odds,@win,@income,@uid,@start_time,
+@end_time,@game_type,@game_id,@last_bean,@last_v_money,@last_free,@cur_bean,@cur_v_money,@cur_free,@bean,@v_money,@free,@valType,@play_count)",
+                new SqlParameter("detail", detail),
+                new SqlParameter("total_bean", obj.game_record.total_bean),
+                new SqlParameter("total_v_money", obj.game_record.total_v_money),
+                new SqlParameter("total_free", obj.game_record.total_free),
+                new SqlParameter("result", obj.game_record.result),
+                new SqlParameter("result_odds", obj.game_record.result_odds),
+                new SqlParameter("win", obj.game_record.win),
+                new SqlParameter("income", obj.game_record.income),
+                new SqlParameter("uid", obj.game_record.uid),
+                new SqlParameter("start_time", obj.game_record.start_time),
+                new SqlParameter("end_time", obj.game_record.end_time),
+                new SqlParameter("game_type", obj.game_record.game_type),
+                new SqlParameter("game_id", obj.game_record.game_id),
+                new SqlParameter("last_bean", last_bean),
+                new SqlParameter("last_v_money", last_v_money),
+                new SqlParameter("last_free", last_free),
+                new SqlParameter("cur_bean", cur_bean),
+                new SqlParameter("cur_v_money", cur_v_money),
+                new SqlParameter("cur_free", cur_free),
+                new SqlParameter("bean", obj.goldenBeans),
+                new SqlParameter("v_money", obj.redPacket),
+                new SqlParameter("free", obj.freeRedPacket),
+                new SqlParameter("valType", obj.valType),
+                new SqlParameter("play_count", obj.count));
+                if (res <= 0)
+                {
+                    db.Close();
+                    data_res = new ResultData();
+                    data_res.status = "1";
+                    data_res.message = "结算成功，记录游戏明细失败";
+                    return data_res;
+                }
+
+            }
+            if (obj.valType == -1) //在这里更新用户每日玩游戏次数，表：game_user_daily_count
+            {
+                string today = DateTime.Now.ToString("yyyy-MM-dd");
+                int res = db.ExeCMD("update game_user_daily_count set count=@count,active=1 where date=@today and uid=@uid", 
+                    new SqlParameter("count",obj.count),
+                    new SqlParameter("today", today),
+                    new SqlParameter("uid", obj.uid));
+                if (res == 0)
+                {
+                    res = db.ExeCMD("insert into game_user_daily_count(uid,date,count) values(@uid,@date,@count)",
+                         new SqlParameter("count", obj.count),
+                         new SqlParameter("today", today),
+                         new SqlParameter("uid", obj.uid));
+                    if (res <= 0)
+                    {
+                        db.Close();
+                        data_res = new ResultData();
+                        data_res.status = "1";
+                        data_res.message = "结算成功，更新游戏局数失败";
+                        return data_res;
+                    }
+                    else
+                    {
+                        db.Close();
+                        data_res = new ResultData();
+                        data_res.status = "0";
+                        data_res.message = "成功";
+                        return data_res;
+                    }
+                }
+                else if (res > 0)
+                {
+                    db.Close();
+                    data_res = new ResultData();
+                    data_res.status = "0";
+                    data_res.message = "成功";
+                    return data_res;
+                }
+                else
+                {
+                    db.Close();
+                    data_res = new ResultData();
+                    data_res.status = "1";
+                    data_res.message = "结算成功，更新游戏局数失败";
+                    return data_res;
+                }
+            }
+            data_res = new ResultData();
+            data_res.status = "0";
+            data_res.message = "成功";
+            return data_res;
 
         }
         /// <summary>
@@ -1287,7 +1447,7 @@ start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_typ
                 h_money_pay = Convert.ToDouble(l[0].redPacket);
                 NeedPlayCount = l[0].need_play_conut;//所需局数转
             }
-            if(PlayToday< NeedPlayCount)
+            if (PlayToday < NeedPlayCount)
             {
                 data_res.status = "1";
                 data_res.message = $@"用户今天游戏局数{PlayToday}小于兑换需要的局数{NeedPlayCount}";
@@ -1295,7 +1455,7 @@ start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_typ
             }
             int res = db.Execute("update rrl_user set h_money_pay=0,h_money=h_money+@h_money_pay,need_play_conut=20 where id=@uid",
                 new { uid = obj.uid, h_money_pay = h_money_pay });
-            if(res<=0)
+            if (res <= 0)
             {
                 data_res.status = "1";
                 data_res.message = "执行更新账户失败";
@@ -1305,14 +1465,14 @@ start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_typ
             {
                 db.Execute("update game_user_daily_count set count=0 where uid=@uid and date=@today", new { uid = obj.uid, today = today });
                 db.Execute("insert into rrl_user_money_record(addtime,money,type,remark,uid) values(@addtime,@money,200,@remark,@uid)",
-                    new { addtime=DateTime.Now,money= h_money_pay, remark=string.Format("V红包转金豆：{0}", h_money_pay),uid= obj.uid });
+                    new { addtime = DateTime.Now, money = h_money_pay, remark = string.Format("V红包转金豆：{0}", h_money_pay), uid = obj.uid });
                 data_res.status = "0";
                 data_res.data = h_money_pay;
                 data_res.message = "成功";
                 return data_res;
-                
+
             }
-            
+
         }
         [HttpPost]
         [ActionName("clear_v_money")]
@@ -1325,7 +1485,7 @@ start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_typ
 
             SqlDataBase db = new SqlDataBase();
             string today = DateTime.Now.ToString("yyyy-MM-dd");
-            
+
             List<SettleAccounts> users = db.Select<SettleAccounts>("select id as uid,h_money_pay as redPacket,need_play_conut from rrl_user where h_money_pay>0", null);
             //List<ClearUser> list = new List<ClearUser>();
             int length = users.Count;
@@ -1349,7 +1509,7 @@ start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_typ
                 int res = 0;
                 //u.PlayToday = PlayToday;
                 //u.NeedPlayCount = NeedPlayCount;
-                if (PlayToday>= NeedPlayCount)
+                if (PlayToday >= NeedPlayCount)
                 {
                     res = db.Execute("update rrl_user set h_money_pay=0,h_money=h_money+@h_money_pay,need_play_conut=20 where id=@uid",
                     new { uid = user.uid, h_money_pay = h_money_pay });
@@ -1359,7 +1519,7 @@ start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_typ
                 else
                 {
                     res = db.Execute("update rrl_user set h_money_pay=0,need_play_conut=20  where id=@uid",
-                    new { uid = user.uid});
+                    new { uid = user.uid });
                     //u.to_bean = 0;
                     //u.to_clear = h_money_pay;
                 }
@@ -1368,7 +1528,7 @@ start_time=obj.game_record.start_time,end_time=obj.game_record.end_time,game_typ
                     db.Execute("update game_user_daily_count set active=0 where date=@today", new { today = today });
                     //list.Add(u);
                 }
-               
+
             }
             data_res.data = length;
             return data_res;
