@@ -1047,135 +1047,141 @@ namespace GameWebApi.Controllers
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
+        //        [HttpPost]
+        //        [ActionName("settle_accounts")]
+        //        public ResultData settle_accounts([FromBody] SettleAccounts obj)
+        //        {
+
+        //            SqlDataBase db = new SqlDataBase();
+        //            decimal last_bean = 0;
+        //            decimal last_v_money = 0;
+        //            decimal last_free = 0;
+        //            decimal cur_bean = 0;
+        //            decimal cur_v_money = 0;
+        //            decimal cur_free = 0;
+        //            List<UserAccount> list_acc = db.Select<UserAccount>("select h_money_free,h_money_pay,h_money from rrl_user where id=@uid", new { uid = obj.uid });
+        //            if (list_acc != null && list_acc.Count > 0)
+        //            {
+        //                last_bean = list_acc[0].h_money;
+        //                last_v_money = list_acc[0].h_money_pay;
+        //                last_free = list_acc[0].h_money_free;
+
+        //            }
+        //            cur_bean = last_bean + obj.goldenBeans;
+        //            cur_v_money = last_v_money + obj.redPacket;
+        //            cur_free = last_free + obj.freeRedPacket;
+        //            string sql = @"UPDATE rrl_user SET 
+        //                            h_money = h_money + @goldenBeans ,h_money_free = h_money_free + @freeRedPacket,h_money_pay = h_money_pay + @redPacket 
+        //                            WHERE id =@id and h_money+@goldenBeans>=0 and h_money_free+@freeRedPacket >=0 and isnull(h_money_pay,0) + @redPacket >= 0 and 
+        //                            isnull(is_locked_login,'0')='0'";
+        //            int rs = db.Execute(sql, new { id = obj.uid, goldenBeans = obj.goldenBeans, redPacket = obj.redPacket, freeRedPacket = obj.freeRedPacket });
+        //            ResultData data_res = new ResultData();
+        //            if (rs <= 0)
+        //            {
+
+        //                data_res.status = "1";
+        //                data_res.message = "更新账户失败";
+        //                return data_res;
+        //            }
+        //            else
+        //            {
+        //                if (obj.game_record != null)
+        //                {
+
+        //                    obj.game_record.uid = obj.uid;
+        //                    string detail = JsonConvert.SerializeObject(obj.game_record.detail);
+        //                    int res = db.Execute(@"insert into game_record(detail,total_bean,total_v_money,total_free,result,result_odds,win,income,uid,start_time,end_time,game_type,game_id,last_bean,last_v_money,last_free,cur_bean,cur_v_money,cur_free,bean,v_money,free,valType,play_count) 
+        //values(@detail,@total_bean,@total_v_money,@total_free,@result,@result_odds,@win,@income,@uid,@start_time,@end_time,@game_type,@game_id,@last_bean,@last_v_money,@last_free,@cur_bean,@cur_v_money,@cur_free,@bean,@v_money,@free,@valType,@play_count)",
+        //new
+        //{
+        //    detail = detail,
+        //    total_bean = obj.game_record.total_bean,
+        //    total_v_money = obj.game_record.total_v_money,
+        //    total_free = obj.game_record.total_free,
+        //    result = obj.game_record.result,
+        //    result_odds = obj.game_record.result_odds,
+        //    win = obj.game_record.win,
+        //    income = obj.game_record.income,
+        //    uid = obj.game_record.uid,
+        //    start_time = obj.game_record.start_time,
+        //    end_time = obj.game_record.end_time,
+        //    game_type = obj.game_record.game_type,
+        //    game_id = obj.game_record.game_id,
+        //    last_bean = last_bean,
+        //    last_v_money = last_v_money,
+        //    last_free = last_free,
+        //    cur_bean = cur_bean,
+        //    cur_v_money = cur_v_money,
+        //    cur_free = cur_free,
+        //    bean = obj.goldenBeans,
+        //    v_money = obj.redPacket,
+        //    free = obj.freeRedPacket,
+        //    valType = obj.valType,
+        //    play_count = obj.count
+        //});
+        //                    if (res <= 0)
+        //                    {
+        //                        data_res = new ResultData();
+        //                        data_res.status = "1";
+        //                        data_res.message = "结算成功，记录游戏明细失败";
+        //                        return data_res;
+        //                    }
+        //                }
+        //                if (obj.valType == -1) //在这里更新用户每日玩游戏次数，表：game_user_daily_count
+        //                {
+        //                    string today = DateTime.Now.ToString("yyyy-MM-dd");
+        //                    int res = db.Execute("update game_user_daily_count set count=@count,active=1 where date=@today and uid=@uid", new { uid = obj.uid, today = today, count = obj.count });
+        //                    if (res == 0)
+        //                    {
+        //                        res = db.Execute("insert into game_user_daily_count(uid,date,count) values(@uid,@date,@count)", new { uid = obj.uid, date = today, count = obj.count });
+        //                        if (res <= 0)
+        //                        {
+        //                            data_res = new ResultData();
+        //                            data_res.status = "1";
+        //                            data_res.message = "结算成功，更新游戏局数失败";
+        //                            return data_res;
+        //                        }
+        //                        else
+        //                        {
+        //                            data_res = new ResultData();
+        //                            data_res.status = "0";
+        //                            data_res.message = "成功";
+        //                            return data_res;
+        //                        }
+        //                    }
+        //                    else if (res > 0)
+        //                    {
+        //                        data_res = new ResultData();
+        //                        data_res.status = "0";
+        //                        data_res.message = "成功";
+        //                        return data_res;
+        //                    }
+        //                    else
+        //                    {
+        //                        data_res = new ResultData();
+        //                        data_res.status = "1";
+        //                        data_res.message = "结算成功，更新游戏局数失败";
+        //                        return data_res;
+        //                    }
+        //                }
+        //                data_res = new ResultData();
+        //                data_res.status = "0";
+        //                data_res.message = "成功";
+        //                return data_res;
+
+        //            }
+
+        //        }
+        /// <summary>
+        /// 结算游戏
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         [HttpPost]
         [ActionName("settle_accounts")]
         public ResultData settle_accounts([FromBody] SettleAccounts obj)
         {
-
-            SqlDataBase db = new SqlDataBase();
-            decimal last_bean = 0;
-            decimal last_v_money = 0;
-            decimal last_free = 0;
-            decimal cur_bean = 0;
-            decimal cur_v_money = 0;
-            decimal cur_free = 0;
-            List<UserAccount> list_acc = db.Select<UserAccount>("select h_money_free,h_money_pay,h_money from rrl_user where id=@uid", new { uid = obj.uid });
-            if (list_acc != null && list_acc.Count > 0)
-            {
-                last_bean = list_acc[0].h_money;
-                last_v_money = list_acc[0].h_money_pay;
-                last_free = list_acc[0].h_money_free;
-
-            }
-            cur_bean = last_bean + obj.goldenBeans;
-            cur_v_money = last_v_money + obj.redPacket;
-            cur_free = last_free + obj.freeRedPacket;
-            string sql = @"UPDATE rrl_user SET 
-                            h_money = h_money + @goldenBeans ,h_money_free = h_money_free + @freeRedPacket,h_money_pay = h_money_pay + @redPacket 
-                            WHERE id =@id and h_money+@goldenBeans>=0 and h_money_free+@freeRedPacket >=0 and isnull(h_money_pay,0) + @redPacket >= 0 and 
-                            isnull(is_locked_login,'0')='0'";
-            int rs = db.Execute(sql, new { id = obj.uid, goldenBeans = obj.goldenBeans, redPacket = obj.redPacket, freeRedPacket = obj.freeRedPacket });
-            ResultData data_res = new ResultData();
-            if (rs <= 0)
-            {
-
-                data_res.status = "1";
-                data_res.message = "更新账户失败";
-                return data_res;
-            }
-            else
-            {
-                if (obj.game_record != null)
-                {
-
-                    obj.game_record.uid = obj.uid;
-                    string detail = JsonConvert.SerializeObject(obj.game_record.detail);
-                    int res = db.Execute(@"insert into game_record(detail,total_bean,total_v_money,total_free,result,result_odds,win,income,uid,start_time,end_time,game_type,game_id,last_bean,last_v_money,last_free,cur_bean,cur_v_money,cur_free,bean,v_money,free,valType,play_count) 
-values(@detail,@total_bean,@total_v_money,@total_free,@result,@result_odds,@win,@income,@uid,@start_time,@end_time,@game_type,@game_id,@last_bean,@last_v_money,@last_free,@cur_bean,@cur_v_money,@cur_free,@bean,@v_money,@free,@valType,@play_count)",
-new
-{
-    detail = detail,
-    total_bean = obj.game_record.total_bean,
-    total_v_money = obj.game_record.total_v_money,
-    total_free = obj.game_record.total_free,
-    result = obj.game_record.result,
-    result_odds = obj.game_record.result_odds,
-    win = obj.game_record.win,
-    income = obj.game_record.income,
-    uid = obj.game_record.uid,
-    start_time = obj.game_record.start_time,
-    end_time = obj.game_record.end_time,
-    game_type = obj.game_record.game_type,
-    game_id = obj.game_record.game_id,
-    last_bean = last_bean,
-    last_v_money = last_v_money,
-    last_free = last_free,
-    cur_bean = cur_bean,
-    cur_v_money = cur_v_money,
-    cur_free = cur_free,
-    bean = obj.goldenBeans,
-    v_money = obj.redPacket,
-    free = obj.freeRedPacket,
-    valType = obj.valType,
-    play_count = obj.count
-});
-                    if (res <= 0)
-                    {
-                        data_res = new ResultData();
-                        data_res.status = "1";
-                        data_res.message = "结算成功，记录游戏明细失败";
-                        return data_res;
-                    }
-                }
-                if (obj.valType == -1) //在这里更新用户每日玩游戏次数，表：game_user_daily_count
-                {
-                    string today = DateTime.Now.ToString("yyyy-MM-dd");
-                    int res = db.Execute("update game_user_daily_count set count=@count,active=1 where date=@today and uid=@uid", new { uid = obj.uid, today = today, count = obj.count });
-                    if (res == 0)
-                    {
-                        res = db.Execute("insert into game_user_daily_count(uid,date,count) values(@uid,@date,@count)", new { uid = obj.uid, date = today, count = obj.count });
-                        if (res <= 0)
-                        {
-                            data_res = new ResultData();
-                            data_res.status = "1";
-                            data_res.message = "结算成功，更新游戏局数失败";
-                            return data_res;
-                        }
-                        else
-                        {
-                            data_res = new ResultData();
-                            data_res.status = "0";
-                            data_res.message = "成功";
-                            return data_res;
-                        }
-                    }
-                    else if (res > 0)
-                    {
-                        data_res = new ResultData();
-                        data_res.status = "0";
-                        data_res.message = "成功";
-                        return data_res;
-                    }
-                    else
-                    {
-                        data_res = new ResultData();
-                        data_res.status = "1";
-                        data_res.message = "结算成功，更新游戏局数失败";
-                        return data_res;
-                    }
-                }
-                data_res = new ResultData();
-                data_res.status = "0";
-                data_res.message = "成功";
-                return data_res;
-
-            }
-
-        }
-        [HttpPost]
-        [ActionName("settle_accounts1")]
-        public ResultData settle_accounts1([FromBody] SettleAccounts obj)
-        {
+            
             RRLDB db = new RRLDB();
             DataSet ds = null;
             decimal last_bean = 0;
@@ -1263,7 +1269,7 @@ new
                 {
                     res = db.ExeCMD("insert into game_user_daily_count(uid,date,count) values(@uid,@date,@count)",
                          new SqlParameter("count", obj.count),
-                         new SqlParameter("today", today),
+                         new SqlParameter("date", today),
                          new SqlParameter("uid", obj.uid));
                     if (res <= 0)
                     {

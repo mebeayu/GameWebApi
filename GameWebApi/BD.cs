@@ -31,12 +31,21 @@ namespace RRL.DB
         public DBSQL(string strConnectString)
         {
             //"Data Source=10.43.4.16;Initial Catalog=zbb;Persist Security Info=True;User ID=jfsys;Password=jfsys123"
-            conn = new SqlConnection(strConnectString);
-            if (conn.State == ConnectionState.Closed)
+            try
             {
-                conn.Open();
+                conn = new SqlConnection(strConnectString);
+                if (conn.State == ConnectionState.Closed)
+                {
+                    conn.Open();
+                }
+                sm = new SqlCommand("", conn);
             }
-            sm = new SqlCommand("", conn);
+            catch (Exception ex)
+            {
+
+                Close();
+            }
+            
         }
 
         public DBSQL(string strAddr, string DBName, string ID, string Password)
